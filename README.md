@@ -1,1 +1,1 @@
-# arduino-morse-translator
+# Arduino Morse Code Translator
