@@ -9,7 +9,7 @@ Unlike standard LCD1602 screens that use the PCF8574 I2C expansion chip, Wavesha
 ## Features
 
 * **Real-time Feedback:** Flashes an LED and sounds a buzzer simultaneously as you tap.
-* **Beginner-Friendly Timing:** Generous custom pauses (2 seconds for letters, 4 seconds for words) so you have time to look at a cheat sheet.
+* **Beginner-Friendly Timing:** Generous custom pauses (2 seconds for letters, 3 seconds for words) so you have time to look at a cheat sheet.
 * **Automatic Row Wrapping:** Automatically jumps to the second row at 16 characters and clears/resets when the screen fills up.
 * **Dedicated Clear Button:** A physical second button to instantly wipe the screen and reset your current word.
 * **Startup Animation:** Displays a custom two-row welcome banner when powered on.
