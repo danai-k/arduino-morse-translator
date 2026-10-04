@@ -1,5 +1,7 @@
 # Arduino Morse Code Translator
 
+![Morse Code Translator Demo](demo.gif)
+
 An interactive, physical Morse code translator built with an Arduino, an I2C LCD screen, a buzzer, an LED, and a custom input/clear button setup. Tap out dots and dashes, watch the visual feedback and read your translated message right on the screen !
 
 Unlike standard LCD1602 screens that use the PCF8574 I2C expansion chip, Waveshare modules utilize the **AiP31068 controller**. Therefore, Standard Arduino libraries (such as `LiquidCrystal_I2C`) are incompatible with this chip. This repository provides a custom header driver (`WaveshareLCD.h`).
