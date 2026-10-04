@@ -89,7 +89,13 @@ void loop() {
   }
   lastClearState = clearState;
 
-  buttonState = digitalRead(PIN_BUTTON); // current state of button
+  int reading = digitalRead(PIN_BUTTON);
+  if (reading != lastButtonState)
+  {
+    delay(50); // to avoid accidental double-click
+    reading = digitalRead(PIN_BUTTON);
+  }
+  buttonState = reading;
 
   // 1. button just got pressed down
   if (buttonState == LOW && lastButtonState == HIGH) 
