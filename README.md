@@ -99,7 +99,7 @@ Here is the standard International Morse Code alphabet programmed into this tran
 ```text
 arduino-waveshare-morse/
 ├── WaveshareLCD.h      # Custom driver header for Waveshare AiP31068 display
-├── MorseTranslator.ino # Main sketch containing logic, timings, and dictionary
+├── MorseTranslator.ino # Main sketch 
 └── README.md           # Project documentation
 ```
 
