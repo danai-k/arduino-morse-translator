@@ -1,21 +1,27 @@
 #include <Wire.h>
-#include <string.h>
 #include "WaveshareLCD.h"
 
 #define PIN_BUTTON 2
-#define PIN_CLEAR_BUTTON 3
-#define PIN_BUZZER 8
-#define PIN_LED 9
+#define CLEAR_BUTTON 3
+#define BUZZER 8
+#define LED 9
 
 unsigned long pressTime = 0;
 unsigned long releaseTime = 0;
+
 int buttonState = HIGH;
 int lastButtonState = HIGH;
 int clearState = HIGH;       
 int lastClearState = HIGH;  
+
 String currMorse = ""; // dots (.) or dashes (-)
-bool spacePrinted = true;
+bool wordStarted = false;
 int charCount = 0;
+
+// can be changed
+const unsigned long dotLimit = 200;
+const unsigned long letterGap = 600;
+const unsigned long wordGap = 3000;
 
 // Morse Code Alphabet
 const char* translateMorse(String morse){
@@ -52,10 +58,13 @@ void printCharacter(const char* text) {
   lcd_print(text);
   charCount++; 
 
-  if (charCount == 16) { lcd_send_cmd(0xC0); } // goto 2nd row
+  if (charCount == 16) 
+  { 
+    lcd_send_cmd(0xC0); // goto 2nd row
+  } 
   else if (charCount >= 32) 
   {
-    lcd_send_cmd(0x01); // Screen is full, cleaning
+    lcd_send_cmd(0x01); // Screen is full, clear
     charCount = 0;  
   }
 }
@@ -65,9 +74,9 @@ void setup() {
   lcd_init();
 
   pinMode(PIN_BUTTON, INPUT_PULLUP);
-  pinMode(PIN_CLEAR_BUTTON, INPUT_PULLUP);
-  pinMode(PIN_BUZZER, OUTPUT);
-  pinMode(PIN_LED, OUTPUT);
+  pinMode(CLEAR_BUTTON, INPUT_PULLUP);
+  pinMode(BUZZER, OUTPUT);
+  pinMode(LED, OUTPUT);
 
   lcd_send_cmd(0x01);              
   lcd_print("       MORSE CODE   ");   
@@ -78,17 +87,18 @@ void setup() {
 }
 
 void loop() {
-  // Clear Button
-  clearState = digitalRead(PIN_CLEAR_BUTTON);
-  if (clearState == LOW && lastClearState == HIGH) 
+  // 1. CLEAR_BUTTON
+  clearState = digitalRead(CLEAR_BUTTON);
+  if (clearState == LOW && lastClearState == HIGH) // just pressed
   {
     lcd_send_cmd(0x01);  
     currMorse = "";      
-    spacePrinted = true;
+    wordStarted = false;
     charCount = 0;
   }
   lastClearState = clearState;
 
+  // 2. PIN_BUTTON
   int reading = digitalRead(PIN_BUTTON);
   if (reading != lastButtonState)
   {
@@ -97,31 +107,37 @@ void loop() {
   }
   buttonState = reading;
 
-  // 1. button just got pressed down
+  // 2.1. just pressed
   if (buttonState == LOW && lastButtonState == HIGH) 
   {
-    pressTime = millis(); // store exactly when it was pressed
-    digitalWrite(PIN_LED, HIGH); // led = on
-    tone(PIN_BUZZER, 1000); // buzzer = on
-    spacePrinted = false; // new word
+    pressTime = millis();
+    digitalWrite(LED, HIGH); 
+    tone(BUZZER, 1000); 
+    wordStarted = true; // no space printed yet
   }
-
-  // 2. button released
+  
+  // 2.2. just released
   if (buttonState == HIGH && lastButtonState == LOW)
   {
     releaseTime = millis();
-    digitalWrite(PIN_LED, LOW);
-    noTone(PIN_BUZZER);
+    digitalWrite(LED, LOW);
+    noTone(BUZZER);
 
     unsigned long duration = releaseTime - pressTime; // how long the button was held down
 
-    if (duration < 200 ){ currMorse += "."; }
-    else { currMorse += "-"; }
+    if (duration < dotLimit )
+    { 
+      currMorse += "."; 
+    }
+    else 
+    { 
+      currMorse += "-"; 
+    }
   }
   lastButtonState = buttonState;
 
-  // 3. End of letter
-  if (buttonState == HIGH && (millis() - releaseTime > 600)) 
+  // 2.3. End of letter
+  if (buttonState == HIGH && (millis() - releaseTime > letterGap)) 
   {
     if (currMorse != "")
     {
@@ -130,13 +146,13 @@ void loop() {
     }
   }
 
-  // 4. end of word
-  if (buttonState == HIGH && (millis() - releaseTime > 3000)) 
+  // 2.4. end of word
+  if (buttonState == HIGH && (millis() - releaseTime > wordGap)) 
   {
-    if (spacePrinted == false) 
+    if (wordStarted) 
     {
       printCharacter(" ");
-      spacePrinted = true; 
+      wordStarted = false; 
     }
   }
 }
